@@ -32,11 +32,11 @@ domain = ''
 def build_argparser():
     """Create ArgumentParser object
 
-    Add arg options
-    Return:: parse_args object."""
+    add arg options
+    return:: parse_args object."""
 
     parser = argparse.ArgumentParser(prog=PROG,
-                                     description="Tool for rule-based user name and email address generation.",
+                                     description="Tool for rule-based username and email address generation.",
                                      epilog="")
     parser.add_argument("-n", "--names", nargs=1,
                         help="Input file format: <first><space><last>",
@@ -121,7 +121,6 @@ def arg_launcher(parser):
 
 def list_formats():
     """Print formatting rules and rule set example"""
-
     print("\n------ Rules ------")
     for rule_name in FORMAT_RULES.keys():
         print("{}:  {}".format(rule_name, FORMAT_RULES[rule_name]))
@@ -160,7 +159,7 @@ def format_name(name_data, rule_set):
             wrapper_set.append(rule)
         else:
             username += rule_data[rule]
-    wrapper_set.reverse()  # preserver wrapper filo order
+    wrapper_set.reverse()  # preserve wrapper filo order
     for wrapper in wrapper_set:
         username = "{}{}{}".format(wrappers[wrapper][0], username, wrappers[wrapper][1])
     return username
