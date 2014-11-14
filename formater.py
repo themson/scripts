@@ -16,8 +16,9 @@ FORMAT_RULES = OrderedDict([('F', '<fist_name>'),
                             ('.', 'delimiter <.>'),
                             ('-', 'delimiter <->'),
                             ('_', 'delimiter <_>'),
+                            ('s', 'delimiter <space>'),
                             ('d', '<domain_name>'),
-                            ('"', 'wrapper "[username||email]"'),
+                            ('\"', 'wrapper "[username||email]"'),
                             ('\'', 'wrapper \'[username||email]\''),
                             ('<', 'wrapper <[username||email]>')
                             ])
@@ -40,7 +41,7 @@ def build_argparser():
     parser.add_argument("-n", "--names", nargs=1,
                         help="Input file format: <first><space><last>",
                         metavar='FILE', dest='name_file')
-    parser.add_argument("-f", "--format", nargs='+',
+    parser.add_argument("-f", "--formats", nargs='+',
                         help="Primary Formats: [<{}>]".format('>, <'.join(FORMAT_RULES.keys())),
                         metavar='RULESETS', dest='formats')
     parser.add_argument("-s", "--secondary-format", nargs=1,
@@ -82,7 +83,7 @@ def arg_launcher(parser):
         print("ERROR: Names file required [-n <FILENAME>]")
         parser.print_usage()
         sys.exit()
-    if args.formats:  # validate and set -f --format
+    if args.formats:  # validate and set -f --formats
         for format_rule in args.formats:
             for rule_char in format_rule:
                 if rule_char in FORMAT_RULES:
@@ -123,7 +124,7 @@ def list_formats():
 
     print("\n------ Rules ------")
     for rule_name in FORMAT_RULES.keys():
-        print("'{}':  {}".format(rule_name, FORMAT_RULES[rule_name]))
+        print("{}:  {}".format(rule_name, FORMAT_RULES[rule_name]))
     print("------------------")
     print("\nExample: {} -n filename -f f.Ld -d example.com \nOutput: f.last@example.com\n".format(PROG))
 
@@ -136,6 +137,7 @@ def is_valid_domain(domain_name):
 def format_name(name_data, rule_set):
     """Generate Formatted name"""
     username = ''
+    wrapper_set = []
     first, last = name_data[0].lower(), name_data[1].lower()
     first_initial, last_initial = first[0], last[0]
     rule_data = {'F': first,
@@ -145,10 +147,21 @@ def format_name(name_data, rule_set):
                  '.': '.',
                  '-': '-',
                  '_': '_',
+                 's': ' ',
                  'd': '@{}'.format(domain)
                  }
+    wrappers = {'\'': ("'", "'"),
+                '"': ('"', '"'),
+                '<': ('<', '>'),
+                '>': ('<', '>')
+                }
     for rule in rule_set:
-        username += rule_data[rule]
+        if rule in wrappers:
+            wrapper_set.append(rule)
+        else:
+            username += rule_data[rule]
+    for wrapper in wrapper_set:
+        username = "{}{}{}".format(wrappers[wrapper][0], username, wrappers[wrapper][1])
     return username
 
 
@@ -156,9 +169,6 @@ def process_names():
     """Iterate, clean, and format names. Write to file or stdout"""
     names_list = []
     output = []
-    double_quotes = False
-    single_quotes = False
-    angle_brackets = False
     with open(names_file, 'r') as names_data:
         for name_data in names_data.readlines():
             name = name_data.split()  # remove multiple spaces & \t
@@ -169,10 +179,10 @@ def process_names():
                 print("ERROR: [<first> <last>] not found. {} currently handles first and last names only.".format(PROG))
                 sys.exit()
             for rule_set in format_rules:
-                formated_name = format_name(name, rule_set)
+                formatted_name = format_name(name, rule_set)
                 if secondary_rule:
-                    formated_name += ' {}'.format(format_name(name, secondary_rule))
-                output.append(formated_name)
+                    formatted_name += ' {}'.format(format_name(name, secondary_rule))
+                output.append(formatted_name)
     output = '\n'.join(output)
     if out_file:
         with open(out_file, 'wb') as output_f:
