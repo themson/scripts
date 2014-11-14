@@ -104,7 +104,6 @@ def arg_launcher(parser):
                 sys.exit()
             elif args.domain:
                 domain = args.domain[0]
-                print(is_valid_domain(domain))
                 if is_valid_domain(domain) is False:
                     print("ERROR: Invalid Domain name: '{}' \n".format(domain))
                     sys.exit()
