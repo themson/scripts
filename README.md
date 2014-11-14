@@ -9,7 +9,7 @@ Collection of useful scripts
 
 ### Help:
 ```
-python formater.py -h
+$ python formater.py -h
 usage: formater.py [-h] [-n FILE] [-f RULESET [RULESET ...]] [-d DOMAIN]
                    [-o FILE] [-l]
 
@@ -29,7 +29,7 @@ optional arguments:
 ```
 ### Formatting Rules:
 ```
-python formater.py -l
+$ python formater.py -l
 
 ------ Rules ------
 'F':  <fist_name>
@@ -47,7 +47,11 @@ Output: f.last@example.com
 ```
 ### Usage Example:
 ```
-python formater.py -n tmp -f FL fL F.L f.L fLd F.Ld fLd lFd -d example.com
+$ cat names.txt
+First Last
+Jane Doe
+
+$ python formater.py -n tmp.txt -f FL fL F.L f.L fLd F.Ld fLd lFd -d example.com
 firstlast
 flast
 first.last
@@ -55,5 +59,13 @@ f.last
 flast@example.com
 first.last@example.com
 flast@example.com
-
+lfirst@example.com
+janedoe
+jdoe
+jane.doe
+j.doe
+jdoe@example.com
+jane.doe@example.com
+jdoe@example.com
+djane@example.com
 ```
