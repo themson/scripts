@@ -17,6 +17,9 @@ FORMAT_RULES = OrderedDict([('F', '<fist_name>'),
                             ('-', 'delimiter <->'),
                             ('_', 'delimiter <_>'),
                             ('d', '<domain_name>'),
+                            ('"', 'wrapper "[username||email]"'),
+                            ('\'', 'wrapper \'[username||email]\''),
+                            ('<', 'wrapper <[username||email]>')
                             ])
 names_file = ''
 format_rules = []
@@ -36,9 +39,12 @@ def build_argparser():
     parser.add_argument("-n", "--names", nargs=1,
                         help="Input file format: <first><space><last>",
                         metavar='FILE', dest='name_file')
-    parser.add_argument("-f", "--format", nargs='+',
-                        help="Format Rules: <{}>".format('>, <'.join(FORMAT_RULES.keys())),
+    parser.add_argument("-f", "--primary-format", nargs='+',
+                        help="Primary Format: [<{}>]".format('>, <'.join(FORMAT_RULES.keys())),
                         metavar='RULESET', dest='format')
+    parser.add_argument("-s", "--secondary-format", nargs='+',
+                        help="Secondary Format: <primary format data> [<{}>]".format('>, <'.join(FORMAT_RULES.keys())),
+                        metavar='RULESET', dest='secondary_format')
     parser.add_argument("-d", "--domain", nargs=1,
                         help="Email Domain: example.com",
                         metavar='DOMAIN', dest='domain')
@@ -90,14 +96,16 @@ def arg_launcher(parser):
         parser.print_usage()
         sys.exit()
 
-    if 'd' in ''.join(format_rules) and not args.domain:
-        print("Domain [-d <DOMAIN>] required for format rule 'd'")
-        parser.print_usage()
-        sys.exit()
-    domain = args.domain[0]
-    if is_valid_domain(domain) is False:
-        print("ERROR: Invalid Domain name: '{}' \n".format(domain))
-        sys.exit()
+    if 'd' in ''.join(format_rules):
+        if not args.domain:
+            print("Domain [-d <DOMAIN>] required for format rule 'd'")
+            parser.print_usage()
+            sys.exit()
+        elif is_valid_domain(domain) is False:
+            print("ERROR: Invalid Domain name: '{}' \n".format(domain))
+            sys.exit()
+        else:
+            domain = args.domain[0]
 
     if args.out_file:
         out_file = args.out_file[0]
@@ -141,6 +149,9 @@ def process_names():
     """Iterate, clean, and format names. Write to file or stdout"""
     names_list = []
     output = []
+    double_quotes = False
+    single_quotes = False
+    angle_brackets = False
     with open(names_file, 'r') as names_data:
         for name_data in names_data.readlines():
             name = name_data.split()  # remove multiple spaces & \t
@@ -174,3 +185,4 @@ if __name__ == '__main__':
 # TODO: Handle Middle Names
 # TODO: Handle 'All' Format Arguments
 # TODO: Allow Separate First Last Files
+# TODO: add second format for wrapping names and emails
