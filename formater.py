@@ -31,7 +31,7 @@ def build_argparser():
     Return:: parse_args object."""
 
     parser = argparse.ArgumentParser(prog=PROG,
-                                     description="Tool for generating user names and email addresses.",
+                                     description="Tool for rule-based user name and email address generation.",
                                      epilog="")
     parser.add_argument("-n", "--names", nargs=1,
                         help="Input file format: <first><space><last>",
