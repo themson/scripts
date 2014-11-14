@@ -206,4 +206,3 @@ if __name__ == '__main__':
 # TODO: Handle Middle Names
 # TODO: Handle 'All' Format Arguments
 # TODO: Allow Separate First Last Files
-# TODO: add second format for wrapping names and emails
