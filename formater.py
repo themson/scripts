@@ -42,10 +42,10 @@ def build_argparser():
                         help="Input file format: <first><space><last>",
                         metavar='FILE', dest='name_file')
     parser.add_argument("-f", "--formats", nargs='+',
-                        help="Primary Formats: [<{}>]".format('>, <'.join(FORMAT_RULES.keys())),
+                        help="Primary Formats: [{}]".format(', '.join(FORMAT_RULES.keys())),
                         metavar='RULESETS', dest='formats')
     parser.add_argument("-s", "--secondary-format", nargs=1,
-                        help="Secondary Format: <primary format data> [<{}>]".format('>, <'.join(FORMAT_RULES.keys())),
+                        help="Secondary Format: <primary format data> [{}]".format(', '.join(FORMAT_RULES.keys())),
                         metavar='RULESET', dest='secondary_format')
     parser.add_argument("-d", "--domain", nargs=1,
                         help="Email Domain: example.com",
@@ -160,6 +160,7 @@ def format_name(name_data, rule_set):
             wrapper_set.append(rule)
         else:
             username += rule_data[rule]
+    wrapper_set.reverse()  # preserver wrapper filo order
     for wrapper in wrapper_set:
         username = "{}{}{}".format(wrappers[wrapper][0], username, wrappers[wrapper][1])
     return username
