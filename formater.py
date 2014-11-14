@@ -4,27 +4,22 @@ import sys
 import argparse
 import re
 from time import sleep
-
+from collections import OrderedDict
 __author__ = 'themson mester'
 
-# TODO: Handle Middle Names
-# TODO: Handle 'All || All@' Format Arguments
-# TODO: Allow Separate First Last Files
 
 PROG = 'formater.py'
-USER_FORMATS = {'IL': '<first_initial><last_name>',
-                'I.L': '<first_initial>.<last_name>',
-                'FL': '<first_name><last_name>',
-                'F.L': '<first_initial>.<last_name>'
-                }
-EMAIL_FORMATS = {'IL@': '<first_initial><last_name>@<domain>',
-                 'I.L@': '<first_initial>.<last_name>@<domain>',
-                 'FL@': '<first_name><last_name>@<domain>',
-                 'F.L@': '<first_initial>.<last_name>@<domain>'
-                 }
-
+FORMAT_RULES = OrderedDict([('F', '<fist_name>'),
+                            ('f', '<last_initial>'),
+                            ('L', '<last_name>'),
+                            ('l', '<last_initial>'),
+                            ('.', 'delimiter <.>'),
+                            ('-', 'delimiter <->'),
+                            ('_', 'delimiter <_>'),
+                            ('d', '<domain_name>'),
+                            ])
 names_file = ''
-output_formats = []
+format_rules = []
 out_file = None
 domain = ''
 
@@ -42,17 +37,16 @@ def build_argparser():
                         help="Input file format: <first><space><last>",
                         metavar='FILE', dest='name_file')
     parser.add_argument("-f", "--format", nargs='+',
-                        help="Output formats: {}, {}".format(' '.join(USER_FORMATS.keys()),
-                                                             ' '.join(EMAIL_FORMATS.keys())),
-                        metavar='FORMAT', dest='format')
+                        help="Format Rules: <{}>".format('>, <'.join(FORMAT_RULES.keys())),
+                        metavar='RULESET', dest='format')
     parser.add_argument("-d", "--domain", nargs=1,
                         help="Email Domain: example.com",
                         metavar='DOMAIN', dest='domain')
     parser.add_argument("-o", "--outfile", nargs=1,
                         help="Output file name",
                         metavar='FILE',  dest='out_file')
-    parser.add_argument("-l", "--list-formats", action='store_true', default=False,
-                        help="Print available output formats",
+    parser.add_argument("-l", "--list-rules", action='store_true', default=False,
+                        help="Print formatting rules table",
                         dest='list_formats')
     return parser
 
@@ -60,7 +54,7 @@ def build_argparser():
 def arg_launcher(parser):
     """Parse command line arguments and check formats validity."""
     global names_file
-    global output_formats
+    global format_rules
     global out_file
     global domain
     args = parser.parse_args()
@@ -83,42 +77,40 @@ def arg_launcher(parser):
         sys.exit()
 
     if args.format:
-        for format_type in args.format:
-            format_ = format_type.upper()
-            if format_ in USER_FORMATS or format_ in EMAIL_FORMATS:
-                output_formats.append(format_)
-            else:
-                print("ERROR: Invalid output format: '{}' - Formats: {} {}".format(args.format[0],
-                      ' '.join(USER_FORMATS.keys()), ' '.join(EMAIL_FORMATS.keys())))
-                sys.exit()
+        for format_rule in args.format:
+            for rule_char in format_rule:
+                if rule_char in FORMAT_RULES:
+                    pass
+                else:
+                    print("ERROR: Invalid Formatting Rule - '{}'".format(rule_char))
+                    sys.exit()
+        format_rules = args.format
     else:
-        print("ERROR: Format Required - Formats: {} {}".format(' '.join(USER_FORMATS.keys()),
-                                                               ' '.join(EMAIL_FORMATS.keys())))
+        print("ERROR: Format rule required - <{}>".format('>, <'.join(FORMAT_RULES.keys())))
         parser.print_usage()
         sys.exit()
 
-    for format_ in output_formats:
-            if format_ in EMAIL_FORMATS.keys() and not args.domain:
-                print("Domain [-d <DOMAIN>] required for format: {}".format(format_))
-                parser.print_usage()
-                sys.exit()
-            elif args.domain:
-                domain = args.domain[0]
-                if is_valid_domain(domain) is False:
-                    print("ERROR: Invalid Domain name: '{}' \n".format(domain))
-                    sys.exit()
+    if 'd' in ''.join(format_rules) and not args.domain:
+        print("Domain [-d <DOMAIN>] required for format rule 'd'")
+        parser.print_usage()
+        sys.exit()
+    domain = args.domain[0]
+    if is_valid_domain(domain) is False:
+        print("ERROR: Invalid Domain name: '{}' \n".format(domain))
+        sys.exit()
 
     if args.out_file:
         out_file = args.out_file[0]
 
 
 def list_formats():
-    """Print current format arguments and their resulting output formats"""
-    print("[-f <FORMATS>] - {} {}".format(' '.join(USER_FORMATS.keys()), ' '.join(EMAIL_FORMATS.keys())))
-    for format_name in USER_FORMATS.keys():
-        print("{}:  {}".format(format_name, USER_FORMATS[format_name]))
-    for format_name in EMAIL_FORMATS.keys():
-        print("{}: {}".format(format_name, EMAIL_FORMATS[format_name]))
+    """Print formatting rules and rule set example"""
+
+    print("\n------ Rules ------")
+    for rule_name in FORMAT_RULES.keys():
+        print("'{}':  {}".format(rule_name, FORMAT_RULES[rule_name]))
+    print("------------------")
+    print("\nExample: {} -n filename -f f.Ld -d example.com \nOutput: f.last@example.com\n".format(PROG))
 
 
 def is_valid_domain(domain_name):
@@ -126,50 +118,45 @@ def is_valid_domain(domain_name):
     return bool(re.search(r'[a-zA-Z\d-]{,63}(\.[a-zA-Z\d-]{,63}).', domain_name))
 
 
-def format_name(name_data, format_):
-    """Output Formats"""
-    if len(name_data) != 2:
-        print("ERROR: [<first> <last>] not found. {} currently handles first and last names only.".format(PROG))
-        sys.exit()
-
-    if format_ == 'IL':  # <first_initial><last_name>
-        return "{}{}".format(name_data[0][0].lower(), name_data[1].lower())
-    elif format_ == 'I.L':  # <first_initial>.<last_name>
-        return "{}.{}".format(name_data[0][0].lower(), name_data[1].lower())
-    elif format_ == 'FL':  # <first_name><last_name>
-        return "{}{}".format(name_data[0].lower(), name_data[1].lower())
-    elif format_ == 'F.L':  # <first_name>.<last_name>
-        return "{}.{}".format(name_data[0].lower(), name_data[1].lower())
-
-    elif format_ == 'IL@':  # <first_initial><last_name>@<domain>
-        return "{}{}@{}".format(name_data[0][0].lower(), name_data[1].lower(), domain)
-    elif format_ == 'I.L@':  # <first_initial>.<last_name>@<domain>
-        return "{}.{}@{}".format(name_data[0][0].lower(), name_data[1].lower(), domain)
-    elif format_ == 'FL@':  # <first_name><last_name>@<domain>
-        return "{}{}@{}".format(name_data[0].lower(), name_data[1].lower(), domain)
-    elif format_ == 'F.L@':  # <first_name>.<last_name>@<domain>
-        return "{}.{}@{}".format(name_data[0].lower(), name_data[1].lower(), domain)
+def format_name(name_data, rule_set):
+    """Generate Formatted name"""
+    username = ''
+    first, last = name_data[0].lower(), name_data[1].lower()
+    first_initial, last_initial = first[0], last[0]
+    rule_data = {'F': first,
+                 'f': first_initial,
+                 'L': last,
+                 'l': last_initial,
+                 '.': '.',
+                 '-': '-',
+                 '_': '_',
+                 'd': '@{}'.format(domain)
+                 }
+    for rule in rule_set:
+        username += rule_data[rule]
+    return username
 
 
 def process_names():
     """Iterate, clean, and format names. Write to file or stdout"""
     names_list = []
     output = []
-
     with open(names_file, 'r') as names_data:
         for name_data in names_data.readlines():
             name = name_data.split()  # remove multiple spaces & \t
             names_list.append(name)
     for name in names_list:
         if name:
-            for format_ in output_formats:
-                output.append(format_name(name, format_))
-
+            if len(name) != 2:
+                print("ERROR: [<first> <last>] not found. {} currently handles first and last names only.".format(PROG))
+                sys.exit()
+            for rule_set in format_rules:
+                output.append(format_name(name, rule_set))
     output = '\n'.join(output)
     if out_file:
         with open(out_file, 'wb') as output_f:
             output_f.write(output)
-        print("{} lines written to '{}' . ".format(len(output.splitlines()), out_file))
+        print("{} name formats written to '{}' ".format(len(output.splitlines()), out_file))
     else:
         print(output)
 
@@ -181,6 +168,9 @@ def main():
     process_names()
     exit()
 
-
 if __name__ == '__main__':
     main()
+
+# TODO: Handle Middle Names
+# TODO: Handle 'All' Format Arguments
+# TODO: Allow Separate First Last Files
