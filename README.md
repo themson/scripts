@@ -10,7 +10,8 @@ Collection of useful scripts
 ### Help:
 ```
 python formater.py -h
-usage: formater.py [-h] [-n FILE] [-f FORMAT [FORMAT ...]] [-d DOMAIN] [-o FILE] [-l]
+usage: formater.py [-h] [-n FILE] [-f RULESET [RULESET ...]] [-d DOMAIN]
+                   [-o FILE] [-l]
 
 Tool for generating user names and email addresses.
 
@@ -18,36 +19,41 @@ optional arguments:
   -h, --help            show this help message and exit
   -n FILE, --names FILE
                         Input file format: <first><space><last>
-  -f FORMAT [FORMAT ...], --format FORMAT [FORMAT ...]
-                        Output formats: I.L F.L FL IL, FL@ F.L@ I.L@ IL@
+  -f RULESET [RULESET ...], --format RULESET [RULESET ...]
+                        Format Rules: <F>, <f>, <L>, <l>, <.>, <->, <_>, <d>
   -d DOMAIN, --domain DOMAIN
                         Email Domain: example.com
   -o FILE, --outfile FILE
                         Output file name
-  -l, --list-formats    Print available output formats
+  -l, --list-rules      Print formatting rules table
 ```
-### Formats:
+### Formatting Rules:
 ```
-  python formater.py -l
-  [-f <FORMATS>] - I.L F.L FL IL FL@ F.L@ I.L@ IL@
-  I.L:  <first_initial>.<last_name>
-  F.L:  <first_initial>.<last_name>
-  FL:  <first_name><last_name>
-  IL:  <first_initial><last_name>
-  FL@: <first_name><last_name>@<domain>
-  F.L@: <first_initial>.<last_name>@<domain>
-  I.L@: <first_initial>.<last_name>@<domain>
-  IL@: <first_initial><last_name>@<domain>
+python formater.py -l
+
+------ Rules ------
+'F':  <fist_name>
+'f':  <last_initial>
+'L':  <last_name>
+'l':  <last_initial>
+'.':  delimiter <.>
+'-':  delimiter <->
+'_':  delimiter <_>
+'d':  <domain_name>
+------------------
+
+Example: formater.py -n filename -f f.Ld -d example.com 
+Output: f.last@example.com
 ```
-### Usage:
+### Usage Example:
 ```
-python formater.py -n tmp -f IL I.L FL F.L I.L@ IL@ FL@ F.L@ -d example.com
-flast
-f.last
+python formater.py -n tmp -f FL fL F.L f.L fLd F.Ld fLd lFd -d example.com
 firstlast
+flast
 first.last
-f.last@example.com
+f.last
 flast@example.com
-firstlast@example.com
 first.last@example.com
+flast@example.com
+
 ```
