@@ -51,7 +51,7 @@ $ cat names.txt
 First Last
 Jane Doe
 
-$ python formater.py -n tmp.txt -f FL fL F.L f.L fLd F.Ld fLd lFd -d example.com
+$ python formater.py -n names.txt -f FL fL F.L f.L fLd F.Ld fLd lFd -d example.com
 firstlast
 flast
 first.last
