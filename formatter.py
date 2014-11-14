@@ -194,11 +194,11 @@ def process_names():
 
 
 def main():
-    """Call arg launcher"""
+    """Parse and validate args, format names data, return to stdout or outfile."""
     parser = build_argparser()
     arg_launcher(parser)
     process_names()
-    exit()
+    sys.exit()
 
 if __name__ == '__main__':
     main()
