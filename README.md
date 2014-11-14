@@ -9,7 +9,7 @@ Collection of useful scripts
 
 ### Help:
 ```
-python formatter.py -h                                     
+$ python formatter.py -h                                     
 usage: formatter.py [-h] [-n FILE] [-f RULESETS [RULESETS ...]] [-s RULESET]
                    [-d DOMAIN] [-o FILE] [-l]
 
@@ -32,7 +32,7 @@ optional arguments:
 ```
 ### Formatting Rules:
 ```
-$python formatter.py -l
+$ python formatter.py -l
 
 ------ Rules ------
 F:  <fist_name>
