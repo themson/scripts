@@ -40,7 +40,7 @@ def build_argparser():
     parser.add_argument("-n", "--names", nargs=1,
                         help="Input file format: <first><space><last>",
                         metavar='FILE', dest='name_file')
-    parser.add_argument("-f", "--primary-format", nargs='+',
+    parser.add_argument("-f", "--format", nargs='+',
                         help="Primary Formats: [<{}>]".format('>, <'.join(FORMAT_RULES.keys())),
                         metavar='RULESETS', dest='formats')
     parser.add_argument("-s", "--secondary-format", nargs=1,
@@ -67,11 +67,10 @@ def arg_launcher(parser):
     global domain
     args = parser.parse_args()
 
-    if args.list_formats is True:
+    if args.list_formats is True:  # validate and set -l, --list-rules
         list_formats()
         sys.exit()
-
-    if args.name_file:
+    if args.name_file:  # validate and set -n, --names
         names_file = args.name_file[0]
         try:
             with open(names_file, 'r'):
@@ -83,8 +82,7 @@ def arg_launcher(parser):
         print("ERROR: Names file required [-n <FILENAME>]")
         parser.print_usage()
         sys.exit()
-
-    if args.formats:
+    if args.formats:  # validate and set -f --format
         for format_rule in args.formats:
             for rule_char in format_rule:
                 if rule_char in FORMAT_RULES:
@@ -97,18 +95,15 @@ def arg_launcher(parser):
         print("ERROR: Format rule required - <{}>".format('>, <'.join(FORMAT_RULES.keys())))
         parser.print_usage()
         sys.exit()
-
-    if args.secondary_format:
-        for format_rule in args.secondary_format:
-            for rule_char in format_rule:
-                if rule_char in FORMAT_RULES:
-                    pass
-                else:
-                    print("ERROR: Invalid Secondary Formatting Rule - '{}'".format(rule_char))
+    if args.secondary_format:  # validate and set -s --secondary-format
+        for rule_char in args.secondary_format[0]:
+            if rule_char in FORMAT_RULES:
+                pass
+            else:
+                print("ERROR: Invalid Secondary Formatting Rule - '{}'".format(rule_char))
                 sys.exit()
-        secondary_rule = args.secondary_format
-
-    if 'd' in ''.join(format_rules):
+        secondary_rule = args.secondary_format[0]
+    if 'd' in ''.join(format_rules) or 'd' in secondary_rule:  # validate and set -d --domain
         if not args.domain:
             print("Domain [-d <DOMAIN>] required for format rule 'd'")
             parser.print_usage()
@@ -119,7 +114,7 @@ def arg_launcher(parser):
         else:
             domain = args.domain[0]
 
-    if args.out_file:
+    if args.out_file:  # validate and set -o --outfile
         out_file = args.out_file[0]
 
 
@@ -174,7 +169,10 @@ def process_names():
                 print("ERROR: [<first> <last>] not found. {} currently handles first and last names only.".format(PROG))
                 sys.exit()
             for rule_set in format_rules:
-                output.append(format_name(name, rule_set))
+                formated_name = format_name(name, rule_set)
+                if secondary_rule:
+                    formated_name += ' {}'.format(format_name(name, secondary_rule))
+                output.append(formated_name)
     output = '\n'.join(output)
     if out_file:
         with open(out_file, 'wb') as output_f:
