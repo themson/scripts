@@ -5,7 +5,7 @@ Collection of useful scripts
 
 
 ### Scripts
-1. formater - Tool for generating user names and email addresses.
+1. formater - Tool for rule-based user name and email addresses generation.
 
 ### Help:
 ```
