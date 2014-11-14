@@ -5,12 +5,12 @@ Collection of useful scripts
 
 
 ### Scripts
-1. formater - Tool for rule-based user name and email address generation.
+1. formatter - Tool for rule-based user name and email address generation.
 
 ### Help:
 ```
-python formater.py -h                                     
-usage: formater.py [-h] [-n FILE] [-f RULESETS [RULESETS ...]] [-s RULESET]
+python formatter.py -h                                     
+usage: formatter.py [-h] [-n FILE] [-f RULESETS [RULESETS ...]] [-s RULESET]
                    [-d DOMAIN] [-o FILE] [-l]
 
 Tool for rule-based user name and email address generation.
@@ -32,7 +32,7 @@ optional arguments:
 ```
 ### Formatting Rules:
 ```
-$python formater.py -l
+$python formatter.py -l
 
 ------ Rules ------
 F:  <fist_name>
@@ -49,7 +49,7 @@ d:  <domain_name>
 <:  wrapper <[username||email]>
 ------------------
 
-Example: formater.py -n filename -f f.Ld -d example.com 
+Example: formatter.py -n filename -f f.Ld -d example.com 
 Output: f.last@example.com
 ```
 ### Usage Examples:
@@ -58,7 +58,7 @@ $ cat names.txt
 First Last
 Jane Doe
 
-$ python formater.py -n names.txt -f FL fL F.L f.L fLd F.Ld fLd lFd -d example.com
+$ python formatter.py -n names.txt -f FL fL F.L f.L fLd F.Ld fLd lFd -d example.com
 firstlast
 flast
 first.last
@@ -76,7 +76,7 @@ jane.doe@example.com
 jdoe@example.com
 djane@example.com
 
-$ python formater.py -n names.txt -f \"FsL -s \<f.Ld -d example.com
+$ python formatter.py -n names.txt -f \"FsL -s \<f.Ld -d example.com
 "first last" <f.last@example.com>
 "jane doe" <j.doe@example.com>
 
