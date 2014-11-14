@@ -23,6 +23,7 @@ FORMAT_RULES = OrderedDict([('F', '<fist_name>'),
                             ])
 names_file = ''
 format_rules = []
+secondary_rule = ''
 out_file = None
 domain = ''
 
@@ -40,9 +41,9 @@ def build_argparser():
                         help="Input file format: <first><space><last>",
                         metavar='FILE', dest='name_file')
     parser.add_argument("-f", "--primary-format", nargs='+',
-                        help="Primary Format: [<{}>]".format('>, <'.join(FORMAT_RULES.keys())),
-                        metavar='RULESET', dest='format')
-    parser.add_argument("-s", "--secondary-format", nargs='+',
+                        help="Primary Formats: [<{}>]".format('>, <'.join(FORMAT_RULES.keys())),
+                        metavar='RULESETS', dest='formats')
+    parser.add_argument("-s", "--secondary-format", nargs=1,
                         help="Secondary Format: <primary format data> [<{}>]".format('>, <'.join(FORMAT_RULES.keys())),
                         metavar='RULESET', dest='secondary_format')
     parser.add_argument("-d", "--domain", nargs=1,
@@ -61,6 +62,7 @@ def arg_launcher(parser):
     """Parse command line arguments and check formats validity."""
     global names_file
     global format_rules
+    global secondary_rule
     global out_file
     global domain
     args = parser.parse_args()
@@ -82,27 +84,37 @@ def arg_launcher(parser):
         parser.print_usage()
         sys.exit()
 
-    if args.format:
-        for format_rule in args.format:
+    if args.formats:
+        for format_rule in args.formats:
             for rule_char in format_rule:
                 if rule_char in FORMAT_RULES:
                     pass
                 else:
                     print("ERROR: Invalid Formatting Rule - '{}'".format(rule_char))
                     sys.exit()
-        format_rules = args.format
+        format_rules = args.formats
     else:
         print("ERROR: Format rule required - <{}>".format('>, <'.join(FORMAT_RULES.keys())))
         parser.print_usage()
         sys.exit()
+
+    if args.secondary_format:
+        for format_rule in args.secondary_format:
+            for rule_char in format_rule:
+                if rule_char in FORMAT_RULES:
+                    pass
+                else:
+                    print("ERROR: Invalid Secondary Formatting Rule - '{}'".format(rule_char))
+                sys.exit()
+        secondary_rule = args.secondary_format
 
     if 'd' in ''.join(format_rules):
         if not args.domain:
             print("Domain [-d <DOMAIN>] required for format rule 'd'")
             parser.print_usage()
             sys.exit()
-        elif is_valid_domain(domain) is False:
-            print("ERROR: Invalid Domain name: '{}' \n".format(domain))
+        elif is_valid_domain(args.domain[0]) is False:
+            print("ERROR: Invalid Domain name: '{}' \n".format(args.domain[0]))
             sys.exit()
         else:
             domain = args.domain[0]
